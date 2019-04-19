@@ -5,9 +5,13 @@ date: "`r format(Sys.Date(), '%m-%d-%Y')`"
 output: html_document
 ---
 
-```{r}
-library(dplyr)
+```{r include=FALSE}
+knitr::opts_chunk$set(echo=FALSE)
 library(rprojroot)
+library(ggplot2)
+library(ggExtra)
+library(tidyr)
+library(dplyr)
 root_dir <- rprojroot::is_rstudio_project$find_file()
 source(file.path(root_dir, "R", "preprocessing.R"))
 ```
@@ -16,5 +20,22 @@ source(file.path(root_dir, "R", "preprocessing.R"))
 unrecog_source <- load_data(file.path(root_dir, "data"))
 source_data <- filter(unrecog_source, task == "source")
 recog_data <- filter(unrecog_source, task == "recog")
+```
+
+```{r accuracy, fig.align="center", fig.width=7, fig.height=7}
+subject_acc <- group_by(unrecog_source, subj, task) %>%
+  summarise(acc = mean(corr, na.rm = TRUE))
+
+{ ggplot(spread(subject_acc, task, acc),
+       aes(x=source, y=recog)) +
+  geom_point(size= 2) +
+  scale_x_continuous("Source Memory Accuracy", limits = c(0,1)) +
+  scale_y_continuous("Recognition Memory Accuracy", limits = c(0,1)) +
+  coord_fixed() +
+  ggtitle("Source vs. Recognition Memory") +
+  theme_gray(base_size = 16) +
+  theme(plot.title = element_text(hjust=0.5))
+} %>%
+  ggMarginal(type = "histogram")
 ```
 
