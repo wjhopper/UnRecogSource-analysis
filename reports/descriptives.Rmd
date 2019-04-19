@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r include=FALSE}
-knitr::opts_chunk$set(echo=FALSE)
+knitr::opts_chunk$set(echo=FALSE, fig.align="center")
 library(rprojroot)
 library(ggplot2)
 library(ggExtra)
@@ -18,13 +18,16 @@ source(file.path(root_dir, "R", "preprocessing.R"))
 
 ```{r load_data}
 unrecog_source <- load_data(file.path(root_dir, "data"))
+missing_trials <- filter(unrecog_source, is.na(response))
+# Remove trials with no response from further analysis
+unrecog_source <- filter(unrecog_source, !is.na(response))
 source_data <- filter(unrecog_source, task == "source")
 recog_data <- filter(unrecog_source, task == "recog")
 ```
 
-```{r accuracy, fig.align="center", fig.width=7, fig.height=7}
+```{r accuracy, fig.width=7, fig.height=7}
 subject_acc <- group_by(unrecog_source, subj, task) %>%
-  summarise(acc = mean(corr, na.rm = TRUE))
+  summarise(acc = mean(corr))
 
 { ggplot(spread(subject_acc, task, acc),
        aes(x=source, y=recog)) +
@@ -39,3 +42,19 @@ subject_acc <- group_by(unrecog_source, subj, task) %>%
   ggMarginal(type = "histogram")
 ```
 
+```{r encoding_tasks, fig.width=12, fig.height=7}
+encoding_tasks <- filter(unrecog_source, type != "lure") %>%
+  group_by(subj, encoding, task) %>%
+  summarise(acc = mean(corr))
+
+ggplot(encoding_tasks, aes(x=acc, fill=encoding)) +
+  geom_histogram(bins=20, alpha=.4, position="identity") +
+  facet_grid(~task, labeller = as_labeller(c("source"="Source",
+                                             "recog"="Recognition"))
+             ) +
+  scale_fill_discrete(guide = guide_legend(override.aes = list(alpha=1))) +
+  scale_x_continuous("Hit Rate (studied items only)") +
+  ggtitle("Accuracy by Encoding Task") +
+  theme_gray(base_size = 16) +
+  theme(plot.title = element_text(hjust=0.5))
+```
