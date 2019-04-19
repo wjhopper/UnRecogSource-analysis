@@ -81,3 +81,28 @@ ggplot(spread(word_freq, task, acc), aes(x=source, y=recog)) +
   theme_bw(base_size = 16) +
   theme(plot.title = element_text(hjust=0.5))
 ```
+
+```{r bias}
+bias_effects <- group_by(recog_data, subj, bias, type) %>%
+  summarise(p = mean(corr)) %>%
+  spread(type, p) %>%
+  mutate(lure = 1-lure,
+         diff = target-lure) %>%
+  rename(HR = target, FAR = lure)
+
+avg_bias_effects <- group_by(bias_effects, bias) %>%
+  summarise_at(c("FAR", "HR"), mean)
+
+ggplot(bias_effects, aes(x=FAR, y=HR, color=bias)) +
+  geom_point() +
+  geom_path(aes(group=subj), color="black") +
+  geom_point(avg_bias_effects) +
+
+
+
+knitr::kable(bias_effects, col.names = c("Subject", "Bias", "FAR", "HR", "HR - FAR"),
+             digits=3, format="html") %>%
+  kableExtra::kable_styling(full_width = FALSE) %>%
+  kableExtra::collapse_rows(columns = 1)
+```
+
