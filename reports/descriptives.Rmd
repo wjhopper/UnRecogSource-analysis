@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo=FALSE, fig.align="center")
 library(rprojroot)
 library(ggplot2)
 library(ggExtra)
+library(scales)
 library(tidyr)
 library(dplyr)
 root_dir <- rprojroot::is_rstudio_project$find_file()
@@ -32,11 +33,13 @@ subject_acc <- group_by(unrecog_source, subj, task) %>%
 { ggplot(spread(subject_acc, task, acc),
        aes(x=source, y=recog)) +
   geom_point(size= 2) +
-  scale_x_continuous("Source Memory Accuracy", limits = c(0,1)) +
-  scale_y_continuous("Recognition Memory Accuracy", limits = c(0,1)) +
+  scale_x_continuous("Source Memory Accuracy", limits = c(0,1),
+                     labels = scales::percent) +
+  scale_y_continuous("Recognition Memory Accuracy", limits = c(0,1),
+                     labels = scales::percent) +
   coord_fixed() +
   ggtitle("Source vs. Recognition Memory") +
-  theme_gray(base_size = 16) +
+  theme_bw(base_size = 16) +
   theme(plot.title = element_text(hjust=0.5))
 } %>%
   ggMarginal(type = "histogram")
@@ -55,6 +58,26 @@ ggplot(encoding_tasks, aes(x=acc, fill=encoding)) +
   scale_fill_discrete(guide = guide_legend(override.aes = list(alpha=1))) +
   scale_x_continuous("Hit Rate (studied items only)") +
   ggtitle("Accuracy by Encoding Task") +
-  theme_gray(base_size = 16) +
+  theme_bw(base_size = 16) +
+  theme(plot.title = element_text(hjust=0.5))
+```
+
+```{r word_frequency, fig.width=12, fig.height=7}
+word_freq <- group_by(unrecog_source, subj, wf, task) %>%
+  summarise(acc = mean(corr))
+
+ggplot(spread(word_freq, task, acc), aes(x=source, y=recog)) +
+  geom_point(size=2) +
+  geom_rug(size=0.1) +
+  facet_grid(~wf, labeller = as_labeller(c("LF"="Low Frequency",
+                                           "HF"="High Frequency"))
+             ) +
+  scale_x_continuous("Source Memory Accuracy", limits = c(0,1),
+                     labels = scales::percent) +
+  scale_y_continuous("Recognition Memory Accuracy", limits = c(0,1),
+                     labels = scales::percent) +
+  coord_fixed() +
+  ggtitle("Accuracy by Word Frequency") +
+  theme_bw(base_size = 16) +
   theme(plot.title = element_text(hjust=0.5))
 ```
