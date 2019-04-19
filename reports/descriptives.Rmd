@@ -1,0 +1,20 @@
+---
+title: "UnrecogSource Descriptive Analysis"
+author: "Will Hopper"
+date: "`r format(Sys.Date(), '%m-%d-%Y')`"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(rprojroot)
+root_dir <- rprojroot::is_rstudio_project$find_file()
+source(file.path(root_dir, "R", "preprocessing.R"))
+```
+
+```{r load_data}
+unrecog_source <- load_data(file.path(root_dir, "data"))
+source_data <- filter(unrecog_source, task == "source")
+recog_data <- filter(unrecog_source, task == "recog")
+```
+
