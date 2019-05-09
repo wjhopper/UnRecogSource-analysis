@@ -95,8 +95,8 @@ avg_bias_effects <- group_by(bias_effects, bias) %>%
 
 ggplot(bias_effects, aes(x=FAR, y=HR, color=bias)) +
   geom_point() +
-  geom_path(aes(group=subj), color="black") +
-  geom_point(avg_bias_effects) +
+  geom_path(mapping=aes(group=subj), color="black") +
+  geom_point(data=avg_bias_effects, stroke=3, shape=4)
 
 
 
