@@ -179,7 +179,7 @@ Package: knitr
 Source: CRAN
 Version: 1.22
 Hash: d7581079d36fa69f84ff721384355734
-Requires: evaluate, highr, markdown, stringr, xfun, yaml
+Requires: evaluate, highr, xfun, yaml, markdown, stringr
 
 Package: labeling
 Source: CRAN
@@ -302,8 +302,8 @@ Package: rmarkdown
 Source: CRAN
 Version: 1.12
 Hash: 241424e590a32decf6e9f0cd32a5760b
-Requires: base64enc, evaluate, htmltools, jsonlite, knitr, mime,
-    stringr, tinytex, yaml
+Requires: base64enc, evaluate, jsonlite, mime, yaml, htmltools,
+    stringr, tinytex, knitr
 
 Package: rprojroot
 Source: CRAN
