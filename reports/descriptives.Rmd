@@ -97,12 +97,28 @@ ggplot(bias_effects, aes(x=FAR, y=HR, color=bias)) +
   geom_point() +
   geom_path(mapping=aes(group=subj), color="black") +
   geom_point(data=avg_bias_effects, stroke=3, shape=4)
+```
 
+```{r conditional}
+conditional_acc_by_subj <- 
+  inner_join(select(source_data, subj, item, bias, source_acc = corr),
+             select(recog_data, subj, item, bias, recog_acc = corr),
+             by = c("subj","item","bias")) %>%
+  group_by(subj, bias, recog_acc) %>%
+  summarise(source_acc = mean(source_acc),
+            n_obs = n())
 
+conditional_acc <- group_by(conditional_acc_by_subj, bias, recog_acc) %>%
+  summarise(source_acc = mean(source_acc))
+```
 
-knitr::kable(bias_effects, col.names = c("Subject", "Bias", "FAR", "HR", "HR - FAR"),
-             digits=3, format="html") %>%
-  kableExtra::kable_styling(full_width = FALSE) %>%
-  kableExtra::collapse_rows(columns = 1)
+```{r conditional_plots, fig.width=8, fig.height=7}
+ggplot(conditional_acc_by_subj, aes(x=factor(recog_acc), y=source_acc, color=bias)) +
+  geom_point(position = position_dodge(width=.5), alpha=.5, shape=16, size=2) +
+  geom_point(data=conditional_acc, position = position_dodge(width=.5),
+             size=4, shape=4, stroke=3) +
+  scale_x_discrete("Recog Accuracy", labels=c(`0`="Miss", `1`="Hit")) +
+  scale_y_continuous("Source Accuracy") +
+  scale_color_discrete("Bias")
 ```
 
