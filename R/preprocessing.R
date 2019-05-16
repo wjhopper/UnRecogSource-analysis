@@ -6,5 +6,6 @@ load_data <- function(dir="data"){
   x <- select(x, -session, -trial, -colour, -total)
   no_resp_trials <- x$response == "None"
   x[no_resp_trials, c("corr", "rt", "response")] <- NA
+  x$null <- ifelse(x$null == 'yes', TRUE, FALSE)
   return(x)
 }
