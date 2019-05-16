@@ -19,9 +19,13 @@ source(file.path(root_dir, "R", "preprocessing.R"))
 
 ```{r load_data}
 unrecog_source <- load_data(file.path(root_dir, "data"))
-missing_trials <- filter(unrecog_source, is.na(response))
 # Remove trials with no response from further analysis
+missing_trials <- filter(unrecog_source, is.na(response))
 unrecog_source <- filter(unrecog_source, !is.na(response))
+# Separate null/catch trials from real trials
+catch_trials <- filter(unrecog_source, null)
+unrecog_source <- filter(unrecog_source, !null)
+# Separate source and recognition task trials, for convienience
 source_data <- filter(unrecog_source, task == "source")
 recog_data <- filter(unrecog_source, task == "recog")
 ```
@@ -99,6 +103,20 @@ ggplot(bias_effects, aes(x=FAR, y=HR, color=bias)) +
   geom_point(data=avg_bias_effects, stroke=3, shape=4)
 ```
 
+```{r catch_trials, fig.height=7, fig.width=7}
+catch_effects <- filter(catch_trials, task=="recog") %>%
+  count(subj, bias, response) %>%
+  complete(subj, bias, response, fill = list(n=0)) %>% # not 100% sure about this step...
+  spread(response, n) %>%
+  rename(new=m, old=z)
+
+ggplot(catch_effects, aes(x=old, y=new, color=bias)) +
+  geom_point(size=2) +
+  geom_abline(slope=1,intercept=0) +
+  ggtitle("Catch trial decision pattern") +
+  coord_fixed()
+```
+
 ```{r conditional}
 conditional_acc_by_subj <- 
   inner_join(select(source_data, subj, item, bias, source_acc = corr),
@@ -117,7 +135,7 @@ ggplot(conditional_acc_by_subj, aes(x=factor(recog_acc), y=source_acc, color=bia
   geom_point(position = position_dodge(width=.5), alpha=.5, shape=16, size=2) +
   geom_point(data=conditional_acc, position = position_dodge(width=.5),
              size=4, shape=4, stroke=3) +
-  scale_x_discrete("Recog Accuracy", labels=c(`0`="Miss", `1`="Hit")) +
+  scale_x_discrete("Recognition Decision", labels=c(`0`="Miss", `1`="Hit")) +
   scale_y_continuous("Source Accuracy") +
   scale_color_discrete("Bias")
 ```
