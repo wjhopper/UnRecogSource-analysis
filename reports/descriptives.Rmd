@@ -1,12 +1,26 @@
 ---
-title: "UnrecogSource Descriptive Analysis"
+title: "Source Memory for Unrecognized Items: Descriptive Analysis"
 author: "Will Hopper"
 date: "`r format(Sys.Date(), '%m-%d-%Y')`"
-output: html_document
+output:
+  html_document:
+    fig_retina: 1
+    fig_width: 6.5
+    fig_height: 6.5
 ---
+```{css, echo=FALSE}
+img {
+  max-width: none;
+}
+
+.main-container {
+  max-width: 1100px !important;
+}
+```
+
 
 ```{r include=FALSE}
-knitr::opts_chunk$set(echo=FALSE, fig.align="center")
+knitr::opts_chunk$set(echo=FALSE, fig.align = "center")
 library(rprojroot)
 library(ggplot2)
 library(ggExtra)
@@ -30,7 +44,7 @@ source_data <- filter(unrecog_source, task == "source")
 recog_data <- filter(unrecog_source, task == "recog")
 ```
 
-```{r accuracy, fig.width=7, fig.height=7}
+```{r accuracy}
 subject_acc <- group_by(unrecog_source, subj, task) %>%
   summarise(acc = mean(corr))
 
@@ -49,7 +63,7 @@ subject_acc <- group_by(unrecog_source, subj, task) %>%
   ggMarginal(type = "histogram")
 ```
 
-```{r encoding_tasks, fig.width=12, fig.height=7}
+```{r encoding_tasks, fig.width=11}
 encoding_tasks <- filter(unrecog_source, type != "lure") %>%
   group_by(subj, encoding, task) %>%
   summarise(acc = mean(corr))
@@ -59,14 +73,21 @@ ggplot(encoding_tasks, aes(x=acc, fill=encoding)) +
   facet_grid(~task, labeller = as_labeller(c("source"="Source",
                                              "recog"="Recognition"))
              ) +
-  scale_fill_discrete(guide = guide_legend(override.aes = list(alpha=1))) +
+  scale_fill_discrete("Encoding",
+                      labels=c('imageability'='Imageability',
+                                'pleasantness'="Pleasantness")) +
   scale_x_continuous("Hit Rate (studied items only)") +
+  scale_y_continuous("Number of Subjects") +
   ggtitle("Accuracy by Encoding Task") +
   theme_bw(base_size = 16) +
-  theme(plot.title = element_text(hjust=0.5))
+  theme(plot.title = element_text(hjust=0.5, margin = margin(b=0)),
+        legend.position = "top",
+        legend.box.margin = margin(t=5,b=5),
+        legend.margin = margin(b=-19),
+        plot.margin = margin(1,1,2,1))
 ```
 
-```{r word_frequency, fig.width=12, fig.height=7}
+```{r word_frequency, fig.width=11}
 word_freq <- group_by(unrecog_source, subj, wf, task) %>%
   summarise(acc = mean(corr))
 
@@ -98,12 +119,22 @@ avg_bias_effects <- group_by(bias_effects, bias) %>%
   summarise_at(c("FAR", "HR"), mean)
 
 ggplot(bias_effects, aes(x=FAR, y=HR, color=bias)) +
-  geom_point() +
+  geom_point(alpha=.5) +
   geom_path(mapping=aes(group=subj), color="black") +
-  geom_point(data=avg_bias_effects, stroke=3, shape=4)
+  geom_point(data=avg_bias_effects, stroke=3, size=3, shape=4) +
+  scale_color_discrete("Bias", labels=c("liberal"="Liberal",
+                                        "conservative"="Conservative")
+                       ) +
+  ggtitle("Bias Manipulation Effects") +
+  theme_bw(base_size = 16) +
+  theme(plot.title = element_text(hjust=0.5, margin = margin(b=-1)),
+        legend.position = "top",
+        legend.box.margin = margin(t=2,b=2),
+        legend.margin = margin(b=-15),
+        plot.margin = margin(1,1,2,1))
 ```
 
-```{r catch_trials, fig.height=7, fig.width=7}
+```{r catch_trials}
 catch_effects <- filter(catch_trials, task=="recog") %>%
   count(subj, bias, response) %>%
   complete(subj, bias, response, fill = list(n=0)) %>% # not 100% sure about this step...
@@ -113,8 +144,17 @@ catch_effects <- filter(catch_trials, task=="recog") %>%
 ggplot(catch_effects, aes(x=old, y=new, color=bias)) +
   geom_point(size=2) +
   geom_abline(slope=1,intercept=0) +
+  scale_color_discrete("Bias", labels=c("liberal"="Liberal",
+                                      "conservative"="Conservative")
+                     ) +
+  coord_fixed() +
   ggtitle("Catch trial decision pattern") +
-  coord_fixed()
+  theme_bw(base_size = 16) +
+  theme(plot.title = element_text(hjust=0.5, margin = margin(b=-1)),
+        legend.position = "top",
+        legend.box.margin = margin(t=2,b=2),
+        legend.margin = margin(b=-15),
+        plot.margin = margin(1,1,2,1))
 ```
 
 ```{r conditional}
@@ -130,13 +170,20 @@ conditional_acc <- group_by(conditional_acc_by_subj, bias, recog_acc) %>%
   summarise(source_acc = mean(source_acc))
 ```
 
-```{r conditional_plots, fig.width=8, fig.height=7}
+```{r conditional_plots}
 ggplot(conditional_acc_by_subj, aes(x=factor(recog_acc), y=source_acc, color=bias)) +
   geom_point(position = position_dodge(width=.5), alpha=.5, shape=16, size=2) +
   geom_point(data=conditional_acc, position = position_dodge(width=.5),
              size=4, shape=4, stroke=3) +
-  scale_x_discrete("Recognition Decision", labels=c(`0`="Miss", `1`="Hit")) +
+  scale_x_discrete("Studied Item Response Type", labels=c(`0`="Miss", `1`="Hit")) +
   scale_y_continuous("Source Accuracy") +
-  scale_color_discrete("Bias")
+  scale_color_discrete("Bias") +
+  ggtitle("Conditional Source Accuracy") +
+  theme_bw(base_size = 16) +
+  theme(plot.title = element_text(hjust=0.5, margin = margin(b=-1)),
+        legend.position = "top",
+        legend.box.margin = margin(t=2,b=2),
+        legend.margin = margin(b=-15),
+        plot.margin = margin(1,1,2,1))
 ```
 
