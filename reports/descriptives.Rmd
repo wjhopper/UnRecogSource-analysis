@@ -55,17 +55,17 @@ recog_data <- filter(unrecog_source, task == "recog")
 
 ## Experimental Design
 
-The experiment was an item recognition experiment (with word stimuli) that also included an item source judgement. Importantly, the source judgement task *preceded* the item recognition decision. This allows assessment of source memory strength without introducing confounds related to recognition task (i.e., recollecting the source during the item test, or learning from the recognition test itself).
+The experiment was an item recognition experiment (using word stimuli) that also included an item source judgement. Importantly, the source judgement task *preceded* the item recognition decision. This allows assessment of source memory strength without introducing confounds related to thr recognition task (i.e., recollecting the source during the item test, or learning from the recognition test itself).
 
 Several factors were manipulated during the encoding and item recognition phases:
 
 - **Word Frequency**: Words used as targets and lures were either "High Frequency" or "Low Frequency" words.
-- **Location/Encoding Task**: The to-be-remembered words were presented in either the top-right or bottom-left corner of the monitor. This location formed the basis for the source-memory judgement. To enhance location memory, participants performed a different encoding task (pleasantness rating, or imageability rating) for items at each location. This location:encoding task mapping was held constant over the entire experiment.
+- **Location/Encoding Task**: The to-be-remembered words were presented in either the top-right or bottom-left corner of the monitor. This location formed the basis for the source-memory judgement. To enhance location memory, participants performed a different encoding task (pleasantness rating, or imageability rating) for items presented at each location. This location:encoding task mapping was held constant over the entire experiment.
 - **Decision Risk (bias)**: The risk vs. reward for each recognition response varied from trial to trial. On half the trials, "Old" was a risky response (earning +1 points for a correct "old" response but losing -3 points for an incorrect "old" response), while "New" was a safer response (earning +3 points for a correct "new" response but losing just -1 points for an incorrect "new" response). This payoff scheme should induce a **conservative response bias** in participants (i.e., relatively *un*willing to respond "old"). 
 
   On the other half of trials, the payoff scheme was reversed: "New" was a risky response (earning +1 points for a correct "new" response but losing -3 points for an incorrect "new" response), while "Old" was a safer response (earning +3 points for a correct "old" response but losing just -1 points for an incorrect "old" response). This payoff scheme should induce a **liberal response bias** in participants (i.e., relatively willing to respond "old").
 
-Together, these manipulations formed a 2 × 2 × 2 factorial design. The participants (N = `r length(unique(catch_trials$subj))`) studied 240 words, organized into 5 lists of 48 words. Each list of studied words was followed by a 30s. distractor task, then the source judgment task, then the item recognition task. In the item recognition task, studied words were mixed with an equal number of unstudied words (lures), for total of 480 item recognition judgments.
+Together, these manipulations formed a 2 × 2 × 2 factorial design. The participants (N = `r length(unique(catch_trials$subj))`) studied 240 words, organized into 5 lists of 48 words. Each list of studied words was followed by a 30s. distractor task, then the source judgment task, then the item recognition task. In the item recognition task, studied words were mixed with an equal number of unstudied words (lures), for total of 98 recognition judgments for each list, and 480 item recognition judgments in the entire experiment.
 
 20 item recognition trials for each subject were randomly chosen to be "null" or "catch" trials. On these trials, the word did not appear to participants, but they were still required to make an old/new response. These "catch" trials were included to asses how participants used the payoff/bias information. On trials where the item is not shown (thus excluding memory information from entering the decision making process), the normative choice would be to select whatever alternative is the "safe" alternative on this particular trial. See [below](#catch-trial-choice-pattern) for an analysis of these trials.
 
@@ -93,7 +93,7 @@ subject_acc <- group_by(unrecog_source, subj, task) %>%
 } %>%
   ggMarginal(type = "histogram")
 ```
- Performance is good on both tasks, and performance on the the two tasks appear strongly correlated. There is only one outlier of the relationship, subject `r filter(ungroup(subject_acc), acc==min(acc))[["subj"]]`, who shows relatively poor item recognition accuracy.
+ Performance is good on both tasks, and performance on the the two tasks appears strongly correlated. There is only one outlier of the relationship, subject `r filter(ungroup(subject_acc), acc==min(acc))[["subj"]]`, who shows relatively poor item recognition accuracy.
 
 
 ## Encoding Task Comparison
@@ -148,12 +148,12 @@ ggplot(spread(word_freq, task, acc), aes(x=source, y=recog)) +
   theme(plot.title = element_text(hjust=0.5))
 ```
 
-The linear relationship between source and item recognition accuracy seems to be similar for both the high and low frequency word groups. There appears to be a small effect of word frequency on item recognition accuracy, with sliglty higher recognition accuracy for low frequency words. The does not appear to be an effect of word frequency on source accuracy.
+The linear relationship between source and item recognition accuracy seems to be similar for both the high and low frequency word groups. There appears to be a small effect of word frequency on item recognition accuracy, with sliglty higher recognition accuracy for low frequency words. There does not appear to be an effect of word frequency on source accuracy.
 
 ## Bias Effects
 
 ### ROC
-The first scatterplot below shows the observed Hit and False Alarm rate pairs observed for each subject in each bias condition. The lines between points connect observations from the same subject. The group average in each bias condition are shown with the larger "X" points.
+The first scatterplot below shows the observed Hit and False Alarm rate pairs for each subject in each bias condition. The lines between points connect observations from the same subject. The group average in each bias condition is shown with the larger "X" points.
 
 ```{r bias}
 bias_effects <- group_by(recog_data, subj, bias, type) %>%
@@ -182,7 +182,7 @@ ggplot(bias_effects, aes(x=FAR, y=HR, color=bias)) +
         plot.margin = margin(1,1,2,1))
 ```
 
-A shift from a conservative response bias to a liberal response bias should be associated with an increase in both the hit and false alarm rates. This pattern is observed in the aggregated data, but is not seen for every subject. Several subjects (e.g., subjects 1, 103, 104, and 105) show the opposite pattern - a decrease in hits and false alarms in the "conservative" condition.
+A shift from a conservative response bias to a liberal response bias should be associated with an increase in both the hit and false alarm rates. This pattern is observed in the aggregated data, but is not seen for every subject. Several subjects (e.g., subjects 1, 103, 104, and 105) show the opposite pattern - a *decrease* in hits and false alarms in the "conservative" condition.
 
 ### Catch Trial Choice Pattern
 To further examine participants sensitivity to the payoff/bias manipulation, their pattern of responding on the "catch" trials was examined. The scatterplot below shows the number of "old" and "new" responses made on these catch trials in each bias condition, with "old" along the Y axis and "new" along the X axis. The major diagonal line (i.e., equal "old" and "new" responses) is included for referece.
@@ -210,9 +210,9 @@ ggplot(catch_effects, aes(x=old, y=new, color=bias)) +
         plot.margin = margin(1,1,2,1))
 ```
 
-If participants were sensitive to the payoff manipulation, then they would respond "old" more frequently when it is the safer response (i.e., the liberal condition), and would response "new" more frequently when it is the safer response (i.e., the conservative condition). This pattern would manifest visually by a separation of the conservative and liberal conditions above and below the major diagonal, respectively.
+If participants were sensitive to the payoff manipulation, then they would respond "old" more frequently when it is the safer response (i.e., the liberal condition), and would respond "new" more frequently when it is the safer response (i.e., the conservative condition). This pattern would manifest visually as a separation of the conservative and liberal conditions above and below the major diagonal, respectively.
 
-This pattern appears to roughly hold, though it the separation is less distict for catch trial reponses under the "conservative" bias payoff. On the whole, the pattern of catch trial responses indicates participants were at least *able* to be sensitive to the payoff schemes.
+This pattern appears to roughly hold, though it the separation is less distict for reponses made under the "liberal" bias payoff. On the whole, the pattern of catch trial responses indicates participants were at least *able* to be sensitive to the payoff schemes.
 
 ## Conditional Source Accuracy
 
