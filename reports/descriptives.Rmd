@@ -8,6 +8,8 @@ output:
     fig_width: 6.5
     fig_height: 6.5
     toc: true
+params:
+  include_semesters: ['SP19', 'FA19']
 ---
 
 ```{css, echo=FALSE}
@@ -38,6 +40,9 @@ source(file.path(root_dir, "R", "preprocessing.R"))
 
 ```{r load_data}
 unrecog_source <- load_data(file.path(root_dir, "data"))
+
+# Subset to specific semesters, if requested in params
+unrecog_source <- filter(unrecog_source, semester %in% params$include_semesters)
 
 # Remove trials with no response from further analysis
 missing_trials <- filter(unrecog_source, is.na(response))
@@ -70,6 +75,19 @@ Together, these manipulations formed a 2 × 2 × 2 factorial design. The partici
 20 item recognition trials for each subject were randomly chosen to be "null" or "catch" trials. On these trials, the word did not appear to participants, but they were still required to make an old/new response. These "catch" trials were included to asses how participants used the payoff/bias information. On trials where the item is not shown (thus excluding memory information from entering the decision making process), the normative choice would be to select whatever alternative is the "safe" alternative on this particular trial. See [below](#catch-trial-choice-pattern) for an analysis of these trials.
 
 In all analysis below, catch trials and trials with no response are excluded (except when analyzing catch trials specifically). Overall, only `r sprintf("%.2f%%", percent_missing*100)` of trials were missing due to non-response.
+
+## Subsets analyzed
+Data from semester(s) `r paste(params$include_semesters, collapse=", ")` analyzed.
+
+```{r}
+distinct(unrecog_source, semester, subj) %>%
+  count(semester) %>%
+  knitr::kable(format = "html",
+               col.names = c("Semester", "N")
+               ) %>%
+  kableExtra::kable_styling(full_width = FALSE)
+```
+
 
 ## Overall Accuracy
 
